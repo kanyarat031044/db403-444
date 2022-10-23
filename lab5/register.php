@@ -1,27 +1,51 @@
 <?php
-$conn = new mysqli('db403-myspl', 'root', 'P@sswOrd', 'northwind');
-if ($conn->connect_errno) {
-    die($conn->connect_error);
-}
+session_start();
+include 'db_connect.php';
 // echo isset( $_POST['submit']) ? $_POST['email']: '';
 $domain_error = false;
 if (isset( $_POST['submit'])) {
 $domain = substr($_POST['email'], -10);
 $domain_error = strtolower($domain) != '@dpu.ac.th';
     if (!$domain_error) {
-       $sql = "insert ioto registration";
-       $sql .= "(fname,lname,gender,dod,email,passw) ";
-       $sql .= "valuer('{$_POST['fname']}', ";
-       $sql .= "'{$_POST['lname']}', '{$_POST['gender']}', ";
-       $sql .= "'{$_POST['dob']}', '{$_POST['email']}', ";
-       $sql .= "'";
-       $sql .= password_hash(
+       // $sql = "insert into registration";
+       // $sql .= "(fname,lname,gender,dod,email,passw) ";
+       // $sql .= "values('{$_POST['fname']}', ";
+      // $sql .= "'{$_POST['lname']}', '{$_POST['gender']}', ";
+       // $sql .= "'{$_POST['dob']}', '{$_POST['email']}', ";
+       // $sql .= "'";
+       // $sql .= password_hash($_POST['password'],PASSWORD_DEFAULT);
+        // $sql .= "')";
+        // echo $sql;
+        $sql = 'insert into registration';
+        $sql .= '(fname,lname,gender,dod,email,passw) ';
+        $sql .= 'values(?,?,?,?,?,?)';
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ssssss',
+            $_POST['fname'],
+            $_POST['lname'],
+            $_POST['gender'],
+            $_POST['dob'],
+            $_POST['email'],
+        $password
+       );
+       $password = password_hash(
         $_POST['password'],
         PASSWORD_DEFAULT);
-        $sql .= "')";
-        echo $sql;
+        try {
+            // $conn->query($sql);
+            $stmt->execute();
+           //  echo 'Successful registration';
+           //  unset($_POST['submit']);
+           $_SESSION['email'] = $_POST['email'];
+           header('location: welcome.php');
+           exit();
+          } catch (Exception $e) {
+            echo "Error: $sql<br>{$e->getMessage()}";
+          }       
+          $stmt->clone();   
     }
 }
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">

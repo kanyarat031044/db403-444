@@ -1,5 +1,7 @@
 <?php
-var_dump($_POST);
+session_start();
+include 'db_connect.php';
+$sql = "select * from registration where email='{$_SESSION['email']}'";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,12 +12,27 @@ var_dump($_POST);
     <title>Document</title>
 </head>
 <body>
-    <p>fname : <?= $_POST['fname'] ?></p>
-    <p>lname : <?= $_POST['lname'] ?></p>
-    <p>gender : <?= $_POST['gender'] ?></p>
-    <p>dod : <?= $_POST['dod'] ?></p>
-    <p>email : <?= $_POST['email'] ?></p>
-    <p>Password : <?= $_POST['Password'] ?></p>
-    
+ <?php
+ try {
+    $result = $conn->query($sql);
+    if($row = $result->fetch_assoc()) {
+?>
+    <p>fname : <?= $row['fname'] ?></p>
+    <p>lname : <?= $row['lname'] ?></p>
+    <p>gender : <?= $row['gender'] ?></p>
+    <p>dod : <?= $row['dod'] ?></p>
+    <p>email : <?= $row['email'] ?></p>
+    <p>Password : <?= $row['passw'] ?></p>
+<?php
+    }
+    else {
+     echo 'User not found.';
+    }
+  }
+  catch(Exception $e) {
+    echo "Error: $sql<br>{$e->getMessage()}";
+  }
+  $conn->close();
+  ?>  
 </body>
 </html>
